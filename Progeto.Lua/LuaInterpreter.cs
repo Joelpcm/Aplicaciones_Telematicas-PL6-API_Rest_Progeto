@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Progeto.Lua
 {
-    internal class LuaInterpreter
+    public class LuaInterpreter
     {
 
         List<DrawingPrimitive> _primitives; // Almacén de la lista de primitivas

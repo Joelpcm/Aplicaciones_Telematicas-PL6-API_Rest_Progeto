@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Progeto.Geometry", "Progeto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Progeto.Lua", "Progeto.Lua\Progeto.Lua.csproj", "{203541E0-E15A-4BB2-9BDA-5D024700B61E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Progeto.API", "Progeto.API\Progeto.API.csproj", "{7C366A38-4365-4320-8922-9A206A8DE75B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{203541E0-E15A-4BB2-9BDA-5D024700B61E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{203541E0-E15A-4BB2-9BDA-5D024700B61E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{203541E0-E15A-4BB2-9BDA-5D024700B61E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C366A38-4365-4320-8922-9A206A8DE75B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C366A38-4365-4320-8922-9A206A8DE75B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C366A38-4365-4320-8922-9A206A8DE75B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C366A38-4365-4320-8922-9A206A8DE75B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
