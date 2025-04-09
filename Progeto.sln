@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Progeto.Geometry", "Progeto.Geometry\Progeto.Geometry.csproj", "{BBA2180F-063A-4707-9EB1-0CB507170E16}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Progeto.Lua", "Progeto.Lua\Progeto.Lua.csproj", "{203541E0-E15A-4BB2-9BDA-5D024700B61E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{BBA2180F-063A-4707-9EB1-0CB507170E16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBA2180F-063A-4707-9EB1-0CB507170E16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBA2180F-063A-4707-9EB1-0CB507170E16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{203541E0-E15A-4BB2-9BDA-5D024700B61E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{203541E0-E15A-4BB2-9BDA-5D024700B61E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{203541E0-E15A-4BB2-9BDA-5D024700B61E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{203541E0-E15A-4BB2-9BDA-5D024700B61E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
