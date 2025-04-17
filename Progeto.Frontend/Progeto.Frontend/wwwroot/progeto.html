@@ -48,6 +48,7 @@
             background-color: #28a745;
             color: white;
         }
+
     </style>
 </head>
 <body onload="SetupEditor()">
@@ -67,8 +68,12 @@
                             <li><a class="dropdown-item" href="#" onclick="LoadExample('example3')">Ejemplo 3</a></li>
                             <li><a class="dropdown-item" href="#" onclick="LoadExample('example4')">Ejemplo 4</a></li>
                             <li><a class="dropdown-item" href="#" onclick="LoadExample('example5')">Ejemplo 5</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="LoadExample('example6')">Ejemplo 6</a></li>
                         </ul>
+                    </li>
+                    <li class="nav-item">
+                        <div class="input-group" style="width: 800px; margin-left: 15px;">
+                            <input type="file" id="fileInput" class="form-control" accept=".lua,.txt" onchange="LoadFromFile(this)">                 
+                        </div>
                     </li>
                 </ul>
                 <button class="btn btn-success" onclick="Run(editor.getSession().getValue())">Ejecutar</button>
@@ -161,6 +166,49 @@
                     console.error(error);
                     alert("Error cargando el ejemplo: " + error.message);
                 });
+        }
+
+        function LoadFromFile(input) {
+            if (!input.files || input.files.length === 0) {
+                console.log('No se seleccionó ningún archivo');
+                return;
+            }
+
+            const file = input.files[0];
+            console.log(`Archivo seleccionado: ${file.name}`);
+
+            // Mostrar que estamos cargando
+            $('#result').html(`Cargando archivo: ${file.name}...`);
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                try {
+                    const content = e.target.result;
+                    editor.setValue(content, -1); // -1 para mover el cursor al inicio
+                    $('#result').html(`Archivo cargado exitosamente: ${file.name}`);
+                    console.log(`Archivo cargado: ${file.name}, tamaño: ${content.length} bytes`);
+                } catch (error) {
+                    console.error('Error al procesar el archivo:', error);
+                    $('#result').html(`Error al procesar el archivo: ${error.message}`);
+                    alert(`Error al procesar el archivo: ${error.message}`);
+                }
+            };
+
+            reader.onerror = function (e) {
+                console.error('Error al leer el archivo:', e);
+                $('#result').html(`Error al leer el archivo: ${e.target.error}`);
+                alert('Error al leer el archivo');
+            };
+
+            // Leer el archivo como texto
+            try {
+                reader.readAsText(file);
+            } catch (error) {
+                console.error('Error iniciando la lectura del archivo:', error);
+                $('#result').html(`Error iniciando la lectura del archivo: ${error.message}`);
+                alert(`Error iniciando la lectura del archivo: ${error.message}`);
+            }
         }
     </script>
 </body>
