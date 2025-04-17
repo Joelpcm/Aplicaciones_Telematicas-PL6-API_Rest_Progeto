@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Progeto Frontend</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap para el layout -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <!-- Editor Ace para la edición del programa-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.0/ace.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- SVG Pan Zoom para permitir zoom y pan-->
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+
+    <style>
+        #program {
+            height: 590px;
+            border: 1px solid #ccc;
+            background-color: #f8f9fa;
+        }
+
+        #result {
+            height: 280px;
+            border: 1px solid #ccc;
+            background-color: #f8f9fa;
+        }
+
+        #svg {
+            height: 920px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            overflow: auto;
+        }
+
+        .header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body onload="SetupEditor()">
+    <!-- Encabezado -->
+    <nav class="navbar navbar-expand-lg navbar-light header">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Progeto</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="examplesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Examples
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="examplesDropdown">
+                            <li><a class="dropdown-item" href="#" onclick="LoadExample('example1')">Ejemplo 1</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="LoadExample('example2')">Ejemplo 2</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="LoadExample('example3')">Ejemplo 3</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="LoadExample('example4')">Ejemplo 4</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="LoadExample('example5')">Ejemplo 5</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="LoadExample('example6')">Ejemplo 6</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <button class="btn btn-success" onclick="Run(editor.getSession().getValue())">Ejecutar</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container-fluid">
+        <div class="row" style="height: 100vh;">
+            <!-- Columna izquierda: Programa y Resultado -->
+            <div class="col-md-6 d-flex flex-column">
+                <div class="mb-2 flex-grow-1">
+                    <h5>Programa</h5>
+                    <div id="program"></div>
+                </div>
+                <div class="flex-grow-0">
+                    <h5>Resultado</h5>
+                    <textarea id="result" class="form-control" readonly></textarea>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Dibujo SVG -->
+            <div class="col-md-6">
+                <h5>Dibujo SVG</h5>
+                <div id="svg"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editor;
+
+        function SetupEditor() {
+            editor = ace.edit("program");
+            editor.setTheme("ace/theme/clouds");
+            editor.getSession().setMode("ace/mode/lua"); // Resaltado de sintaxis para Lua
+            editor.setFontSize(14);
+            editor.setShowPrintMargin(false);
+            editor.setOptions({
+                enableBasicAutocompletion: true, // Autocompletar
+                enableLiveAutocompletion: true, // Autocompletar en tiempo real
+                showLineNumbers: true, // Números de linea
+                showGutter: true // Margen izquierdo
+            });
+            editor.focus();
+        }
+
+        async function Run(source) {
+            const serviceBase = 'http://localhost:5030/api/run';
+
+            const program = { source };
+
+            try {
+                const response = await fetch(serviceBase, {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(program)
+                });
+
+                const data = await response.json();
+
+                $('#result').html(`${data.result}\n\nTiempo de ejecución: ${data.executionTimeMs} ms`);
+                $('#svg').html(data.svg);
+                svgPanZoom('#drawing');
+
+            } catch (error) {
+                alert("Error ejecutando el programa: " + error);
+            }
+        }
+
+        function LoadExample(example) {
+            const examplePath = `examples/${example}.lua`;
+
+            fetch(examplePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`No se pudo cargar el ejemplo: ${example}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log(`Cargando ejemplo: ${example}`);
+                    editor.setValue(data, -1); // -1 para mover el cursor al inicio
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Error cargando el ejemplo: " + error.message);
+                });
+        }
+    </script>
+</body>
+</html>
