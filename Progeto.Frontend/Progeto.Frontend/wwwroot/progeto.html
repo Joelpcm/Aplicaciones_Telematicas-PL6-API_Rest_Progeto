@@ -44,9 +44,38 @@
             border-bottom: 1px solid #ccc;
         }
 
-        .btn-success {
+        .btn-run {
+            background-color: dodgerblue;
+            color: white;
+            border-color: black;
+        }
+        .btn-run:hover {
+            background-color: lightskyblue;
+            color: black;
+        }
+
+        .btn-save {
+            margin-right: 10px;
             background-color: #28a745;
             color: white;
+            border-color: black;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+        .btn-save:hover {
+            background-color: lightgreen;
+            color: black;
+        }
+        .btn-cancel {
+            background-color: #ff001e;
+            color: white;
+            border-color: black;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+        .btn-cancel:hover {
+            background-color: #ffa5b0;
+            color: black;
         }
 
     </style>
@@ -70,13 +99,23 @@
                             <li><a class="dropdown-item" href="#" onclick="LoadExample('example5')">Ejemplo 5</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="savedProgramsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Programas Guardados
+                        </a>
+                        <ul class="dropdown-menu" id="savedProgramsList" aria-labelledby="savedProgramsDropdown">
+                            <li><a class="dropdown-item" href="#" onclick="LoadSavedProgramsList()">Cargar lista de programas</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <div class="input-group" style="width: 800px; margin-left: 15px;">
-                            <input type="file" id="fileInput" class="form-control" accept=".lua,.txt" onchange="LoadFromFile(this)">                 
+                            <input type="file" id="fileInput" class="form-control" accept=".lua,.txt" onchange="LoadFromFile(this)">
+                            <button class="btn btn-save" onclick="UploadFile()">Guardar Programa</button>
+                            <button class="btn btn-cancel" onclick="CancelFile()">Cancelar</button>
                         </div>
                     </li>
                 </ul>
-                <button class="btn btn-success" onclick="Run(editor.getSession().getValue())">Ejecutar</button>
+                <button class="btn btn-run" onclick="Run(editor.getSession().getValue())">Ejecutar</button>
             </div>
         </div>
     </nav>
@@ -104,112 +143,218 @@
         </div>
     </div>
 
-    <script>
-        let editor;
+        <script>
+            let editor;
 
-        function SetupEditor() {
-            editor = ace.edit("program");
-            editor.setTheme("ace/theme/clouds");
-            editor.getSession().setMode("ace/mode/lua"); // Resaltado de sintaxis para Lua
-            editor.setFontSize(14);
-            editor.setShowPrintMargin(false);
-            editor.setOptions({
-                enableBasicAutocompletion: true, // Autocompletar
-                enableLiveAutocompletion: true, // Autocompletar en tiempo real
-                showLineNumbers: true, // Números de linea
-                showGutter: true // Margen izquierdo
-            });
-            editor.focus();
-        }
-
-        async function Run(source) {
-            const serviceBase = 'http://localhost:5030/api/run';
-
-            const program = { source };
-
-            try {
-                const response = await fetch(serviceBase, {
-                    method: "POST",
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(program)
+            function SetupEditor() {
+                editor = ace.edit("program");
+                editor.setTheme("ace/theme/clouds");
+                editor.getSession().setMode("ace/mode/lua"); // Resaltado de sintaxis para Lua
+                editor.setFontSize(14);
+                editor.setShowPrintMargin(false);
+                editor.setOptions({
+                    enableBasicAutocompletion: true, // Autocompletar
+                    enableLiveAutocompletion: true, // Autocompletar en tiempo real
+                    showLineNumbers: true, // Números de linea
+                    showGutter: true // Margen izquierdo
                 });
-
-                const data = await response.json();
-
-                $('#result').html(`${data.result}\n\nTiempo de ejecución: ${data.executionTimeMs} ms`);
-                $('#svg').html(data.svg);
-                svgPanZoom('#drawing');
-
-            } catch (error) {
-                alert("Error ejecutando el programa: " + error);
-            }
-        }
-
-        function LoadExample(example) {
-            const examplePath = `examples/${example}.lua`;
-
-            fetch(examplePath)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`No se pudo cargar el ejemplo: ${example}`);
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    console.log(`Cargando ejemplo: ${example}`);
-                    editor.setValue(data, -1); // -1 para mover el cursor al inicio
-                })
-                .catch(error => {
-                    console.error(error);
-                    alert("Error cargando el ejemplo: " + error.message);
-                });
-        }
-
-        function LoadFromFile(input) {
-            if (!input.files || input.files.length === 0) {
-                console.log('No se seleccionó ningún archivo');
-                return;
+                editor.focus();
             }
 
-            const file = input.files[0];
-            console.log(`Archivo seleccionado: ${file.name}`);
+            async function Run(source) {
+                const serviceBase = 'http://localhost:5030/api/run';
 
-            // Mostrar que estamos cargando
-            $('#result').html(`Cargando archivo: ${file.name}...`);
+                const program = { source };
 
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
                 try {
-                    const content = e.target.result;
-                    editor.setValue(content, -1); // -1 para mover el cursor al inicio
-                    $('#result').html(`Archivo cargado exitosamente: ${file.name}`);
-                    console.log(`Archivo cargado: ${file.name}, tamaño: ${content.length} bytes`);
+                    const response = await fetch(serviceBase, {
+                        method: "POST",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(program)
+                    });
+
+                    const data = await response.json();
+
+                    $('#result').html(`${data.result}\n\nTiempo de ejecución: ${data.executionTimeMs} ms`);
+                    $('#svg').html(data.svg);
+                    svgPanZoom('#drawing');
+
                 } catch (error) {
-                    console.error('Error al procesar el archivo:', error);
-                    $('#result').html(`Error al procesar el archivo: ${error.message}`);
-                    alert(`Error al procesar el archivo: ${error.message}`);
+                    alert("Error ejecutando el programa: " + error);
                 }
-            };
-
-            reader.onerror = function (e) {
-                console.error('Error al leer el archivo:', e);
-                $('#result').html(`Error al leer el archivo: ${e.target.error}`);
-                alert('Error al leer el archivo');
-            };
-
-            // Leer el archivo como texto
-            try {
-                reader.readAsText(file);
-            } catch (error) {
-                console.error('Error iniciando la lectura del archivo:', error);
-                $('#result').html(`Error iniciando la lectura del archivo: ${error.message}`);
-                alert(`Error iniciando la lectura del archivo: ${error.message}`);
             }
-        }
-    </script>
+
+            function LoadExample(example) {
+                const examplePath = `examples/${example}.lua`;
+
+                fetch(examplePath)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`No se pudo cargar el ejemplo: ${example}`);
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        console.log(`Cargando ejemplo: ${example}`);
+                        editor.setValue(data, -1); // -1 para mover el cursor al inicio
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert("Error cargando el ejemplo: " + error.message);
+                    });
+            }
+
+            function LoadFromFile(input) {
+                if (!input.files || input.files.length === 0) {
+                    console.log('No se seleccionó ningún archivo');
+                    return;
+                }
+
+                const file = input.files[0];
+                console.log(`Archivo seleccionado: ${file.name}`);
+
+                // Mostrar que estamos cargando
+                $('#result').html(`Cargando archivo: ${file.name}...`);
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    try {
+                        const content = e.target.result;
+                        editor.setValue(content, -1); // -1 para mover el cursor al inicio
+                        $('#result').html(`Archivo cargado exitosamente: ${file.name}`);
+                        console.log(`Archivo cargado: ${file.name}, tamaño: ${content.length} bytes`);
+                    } catch (error) {
+                        console.error('Error al procesar el archivo:', error);
+                        $('#result').html(`Error al procesar el archivo: ${error.message}`);
+                        alert(`Error al procesar el archivo: ${error.message}`);
+                    }
+                };
+
+                reader.onerror = function (e) {
+                    console.error('Error al leer el archivo:', e);
+                    $('#result').html(`Error al leer el archivo: ${e.target.error}`);
+                    alert('Error al leer el archivo');
+                };
+
+                // Leer el archivo como texto
+                try {
+                    reader.readAsText(file);
+                } catch (error) {
+                    console.error('Error iniciando la lectura del archivo:', error);
+                    $('#result').html(`Error iniciando la lectura del archivo: ${error.message}`);
+                    alert(`Error iniciando la lectura del archivo: ${error.message}`);
+                }
+            }
+
+            // Función para subir programa
+            async function UploadFile() {
+                const fileInput = document.getElementById('fileInput'); // Cambiado a 'fileInput'
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert("Por favor, selecciona un archivo para subir.");
+                    return;
+                }
+
+                const file = fileInput.files[0];
+                const formData = new FormData();
+                formData.append("file", file);
+
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert("Archivo subido exitosamente");
+                    } else {
+                        const error = await response.text();
+                        alert(`Error al subir el archivo: ${error}`);
+                    }
+                } catch (error) {
+                    console.error("Error al subir el archivo:", error);
+                    alert("Error al subir el archivo.");
+                }
+            }
+
+            // Cancelar la selección de archivo y borrar contenido del editor de codigoa
+            function CancelFile() {
+                const fileInput = document.getElementById('fileInput');
+                fileInput.value = ""; // Restablece el valor del input de archivo
+                $('#result').html("Carga de archivo cancelada."); // Opcional: Mensaje en el área de resultados
+
+                // Limpia el contenido del editor
+                if (editor) {
+                    editor.setValue("", -1); // Borra el contenido y mueve el cursor al inicio
+                }
+
+                // Limpia el área de resultados
+                $('#result').html("Carga de archivo cancelada.");
+            }
+
+            // Función para cargar la lista de programas guardados
+            function LoadSavedProgramsList() {
+                const savedProgramsList = document.getElementById('savedProgramsList');
+
+                // Limpiar el contenido actual del menú
+                savedProgramsList.innerHTML = "";
+
+                // Hacer una solicitud al backend para obtener la lista de archivos
+                fetch('/list-uploads')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("No se pudo obtener la lista de programas guardados.");
+                        }
+                        return response.json();
+                    })
+                    .then(files => {
+                        if (files.length === 0) {
+                            const emptyItem = document.createElement('li');
+                            emptyItem.innerHTML = '<a class="dropdown-item" href="#">No hay programas guardados</a>';
+                            savedProgramsList.appendChild(emptyItem);
+                            return;
+                        }
+
+                        // Agregar cada archivo al menú
+                        files.forEach(file => {
+                            const listItem = document.createElement('li');
+                            listItem.innerHTML = `<a class="dropdown-item" href="#" onclick="LoadSavedProgram('${file}')">${file}</a>`;
+                            savedProgramsList.appendChild(listItem);
+                        });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert("Error al cargar la lista de programas guardados.");
+                    });
+            }
+
+            // Función para cargar un programa guardado
+            function LoadSavedProgram(fileName) {
+                const filePath = `/uploads/${fileName}`;
+
+                fetch(filePath)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`No se pudo cargar el programa guardado: ${fileName}`);
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        editor.setValue(data, -1); // Cargar el contenido en el editor
+                        $('#result').html(`Programa cargado: ${fileName}`);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert("Error al cargar el programa guardado: " + error.message);
+                    });
+            }
+   
+
+           
+        </script>
 </body>
 </html>
